@@ -22,15 +22,17 @@ INTERVAL_LABELS = {"1d": "일봉", "1wk": "주봉", "1mo": "월봉", "3mo": "분
 RESAMPLE_RULE = {"1wk": "W", "1mo": "ME", "3mo": "QE"}
 UP, DOWN = "#e5342b", "#1f6fe5"  # 한국식: 상승 빨강 / 하락 파랑
 
-# 자주 찾는 종목 (빠른 선택)
-PRESETS = {
-    "삼성전자 005930": "005930",
-    "SK하이닉스 000660": "000660",
-    "NAVER 035420": "035420",
-    "카카오 035720": "035720",
-    "현대차 005380": "005380",
-    "LG에너지솔루션 373220": "373220",
-}
+# 관심 종목 (빠른 선택) — 종목명은 실행 시 자동으로 붙습니다.
+WATCHLIST = [
+    "059270", "313760", "060230", "023440", "196490", "217620", "203690",
+    "082210", "227100", "323230", "041590", "224060", "317240", "017000",
+    "214870", "136510", "033310", "219750", "096640", "159910", "056000",
+    "060300", "197140", "215090", "099520", "045890", "058420", "066110",
+    "086250", "127160", "900100", "029480", "036260", "080440", "033600",
+    "082660", "150840", "069540", "106520", "197210", "111820", "083470",
+    "008800", "131100", "030270", "047440", "112240", "038530", "058370",
+    "068150", "056730", "036500", "038160",
+]
 
 
 @st.cache_data(show_spinner=False)
@@ -110,13 +112,23 @@ st.title("📈 주가 차트 조회")
 st.caption("종목코드와 기간을 입력하면 인터랙티브 캔들차트를 보여줍니다. (한국거래소 · FinanceDataReader)")
 
 if "code" not in st.session_state:
-    st.session_state.code = "005930"
+    st.session_state.code = WATCHLIST[0]
+
+
+def _pick_from_watchlist():
+    st.session_state.code = st.session_state.watch_pick
+
 
 with st.sidebar:
-    st.subheader("빠른 선택")
-    for label, c in PRESETS.items():
-        if st.button(label, use_container_width=True):
-            st.session_state.code = c
+    st.subheader("관심 종목")
+    st.selectbox(
+        "목록에서 선택",
+        options=WATCHLIST,
+        key="watch_pick",
+        format_func=lambda c: f"{get_stock_name(c)} ({c})",
+        on_change=_pick_from_watchlist,
+    )
+    st.caption(f"총 {len(WATCHLIST)}개 · 선택하면 아래 차트가 바뀝니다.")
 
 c1, c2, c3, c4 = st.columns([1.2, 1, 1, 1])
 with c1:
